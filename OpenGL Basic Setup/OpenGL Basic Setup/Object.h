@@ -1,64 +1,40 @@
 #pragma once
 #include <vector>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/vec3.hpp>
+#include "Structs.h"
 
 class Shader;
 
-//struct Cube
-//{
-//	float vertices[] = {
-//		// Back face		// Color
-//		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Bottom-left
-//		 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Bottom-right
-//		 0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Top-right
-//		 0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Top-right (again, for the second triangle)
-//		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Top-left
-//		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-left (again, to close the face)
-//
-//		// Front face		// Color
-//		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Bottom-left
-//		 0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Bottom-right
-//		 0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // Top-right
-//		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top-right (again)
-//		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Top-left
-//		-0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // Bottom-left (again)
-//
-//		// Left face		// Color
-//		-0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top-right (front)
-//		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Top-left (back)
-//		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-left (back)
-//		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Bottom-left (back, again)
-//		-0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Bottom-right (front)
-//		-0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // Top-right (front, again)
-//
-//		// Right face		// Color
-//		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top-left (front)
-//		 0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Top-right (back)
-//		 0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right (back)
-//		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Bottom-right (back, again)
-//		 0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Bottom-left (front)
-//		 0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // Top-left (front, again)
-//
-//		 // Bottom face		// Color
-//		 -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Top-right (back)
-//		  0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Top-left (back)
-//		  0.5f, -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // Bottom-left (front)
-//		  0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Bottom-left (front, again)
-//		 -0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Bottom-right (front)
-//		 -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Top-right (back, again)
-//
-//		 // Top face		// Color
-//		 -0.5f,  0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Top-left (back)
-//		  0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Top-right (back)
-//		  0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right (front)
-//		  0.5f,  0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Bottom-right (front, again)
-//		 -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Bottom-left (front)
-//		 -0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f  // Top-left (back, again)
-//	};
-//};
+enum Object_Type
+{
+	CUBE,
+	SPHERE,
+	PYRAMID,
+	PLANE
+};
 
 
 class Object
 {
+	Object(Object_Type object_type = CUBE);
+	~Object();
 
+	void Draw(Shader& shader);
+	void CreateCube(float width = 1.0f, float height = 1.0f, float depth = 1.0f, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f));
+
+private:
+	unsigned int VAO, VBO, EBO;
+	std::vector<Vertex> Vertices;
+	glm::vec3 Position;
+	glm::vec3 Scale;
+	glm::mat4 ModelMatrix;
+	glm::vec3 RotationAxis;
+	std::vector<unsigned int> Indices;
+
+	float RotationAngle;
+
+	void SetupElementMesh();
+	void UpdateModelMatrix();
 };
 
