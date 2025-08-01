@@ -2,6 +2,8 @@
 #include "Object.h"
 #include "Shader.h"
 
+//Try to make a class that could function as a prototype of a card template
+
 Object::Object(Object_Type object_type)
 {
 	if (object_type == CUBE)

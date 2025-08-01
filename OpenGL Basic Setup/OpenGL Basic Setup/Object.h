@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <vector>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/vec3.hpp>
@@ -14,6 +15,25 @@ enum Object_Type
 	PLANE
 };
 
+enum Card_Tribe
+{
+	BEAST,
+	ELF,
+	THERIAN,
+	DRAGON,
+	MAGIC
+};
+
+enum Card_Type
+{
+	FIRE,
+	EARTH,
+	AIR,
+	WATER,
+	LIGHT,
+	DARK
+};
+
 
 class Object
 {
@@ -22,6 +42,8 @@ class Object
 
 	void Draw(Shader& shader);
 	void CreateCube(float width = 1.0f, float height = 1.0f, float depth = 1.0f, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f));
+
+	void CreateCard(Card_Tribe tribe, Card_Type type, int cost, int attack, int health, std::string name, std::string description);
 
 private:
 	unsigned int VAO, VBO, EBO;
