@@ -133,6 +133,7 @@
     <ClInclude Include="Dependencies\includes\KHR\khrplatform.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Structs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />

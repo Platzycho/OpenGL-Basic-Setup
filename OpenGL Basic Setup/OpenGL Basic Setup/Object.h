@@ -37,13 +37,18 @@ enum Card_Type
 
 class Object
 {
-	Object(Object_Type object_type = CUBE);
+public:
+	Object(Object_Type object_type = CUBE, float scale = 1.f, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f));
 	~Object();
 
 	void Draw(Shader& shader);
+	void DrawLines(Shader& shader);
 	void CreateCube(float width = 1.0f, float height = 1.0f, float depth = 1.0f, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f));
 
 	void CreateCard(Card_Tribe tribe, Card_Type type, int cost, int attack, int health, std::string name, std::string description);
+
+	void changeColor(glm::vec3 color);
+	void rotate(glm::mat4 model, float time, glm::vec3 rotation);
 
 private:
 	unsigned int VAO, VBO, EBO;

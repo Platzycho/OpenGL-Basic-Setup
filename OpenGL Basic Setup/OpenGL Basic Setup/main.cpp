@@ -1,6 +1,7 @@
 #include "Shader.h"
 #include "GLFW/glfw3.h"
 #include "Camera.h"
+#include "Object.h"
 #include <algorithm>
 
 struct CallbackData {
@@ -49,6 +50,8 @@ int main() {
 
 	Shader myShader("shader.vs", "shader.fs");
 
+	Object defaultCube(CUBE, 1.f, glm::vec3(1.0f, 0.0f, 1.0f));
+
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)800 / (float)600, 0.1f, 100.0f);
 	glm::mat4 view = camera.GetViewMatrix();
 
@@ -62,62 +65,6 @@ int main() {
 
 	glfwSetCursorPosCallback(window, mouse_callback);
 
-	float vertices[] = {
-		// Back face		// Color
-		-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Bottom-left
-		 0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Bottom-right
-		 0.5f,  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Top-right
-		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Top-left
-
-		// Front face		// Color
-		-0.5f, -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Bottom-left
-		 0.5f, -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Bottom-right
-		 0.5f,  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, // Top-right
-		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Top-left
-	};
-
-	int indices[] = 
-	{
-		// Back face
-		0, 1, 2, 2, 3, 0,
-		// Front face
-		4, 5, 6, 6, 7, 4,
-		// Left face
-		0, 3, 7, 7, 4, 0,
-		// Right face
-		1, 5, 6, 6, 2, 1,
-		// Bottom face
-		0, 1, 5, 5, 4, 0,
-		// Top face
-		3, 2, 6, 6, 7, 3
-	};
-
-	unsigned int VBO, VAO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	//Position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	//Color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	//Normal
-	/*glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);*/
-	glBindVertexArray(0);
-	glEnable(GL_DEPTH_TEST);
-
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	while (!glfwWindowShouldClose(window))
@@ -129,9 +76,8 @@ int main() {
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		glEnable(GL_DEPTH_TEST);
 		myShader.use();
-
 		// Pass projection matrix to shader (note: in this case it's fine to do it once per frame)
 		glUniformMatrix4fv(glGetUniformLocation(myShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -143,16 +89,15 @@ int main() {
 		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, -1.0f, 1.0f));
 		glUniformMatrix4fv(glGetUniformLocation(myShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
+		//defaultCube.changeColor(glm::vec3);
+		defaultCube.Draw(myShader);
+		//defaultCubeOutline.DrawLines(myShader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+	defaultCube.~Object();
 	glfwTerminate();
 	return 0;
 }

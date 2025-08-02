@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include <iostream>
+
 glm::mat4 Camera::GetViewMatrix()
 {
     return glm::lookAt(Position, Position + Front, Up);
@@ -36,6 +38,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
         if (Pitch < -89.0f)
             Pitch = -89.0f;
     }
+    std::cout << Yaw << std::endl;
     updateCameraVectors();
 }
 
