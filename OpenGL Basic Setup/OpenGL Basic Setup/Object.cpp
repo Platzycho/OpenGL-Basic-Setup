@@ -1,15 +1,27 @@
 
 #include "Object.h"
 #include "Shader.h"
+const double M_PI = 3.141592653589793;
+
 
 //Try to make a class that could function as a prototype of a card template
 
 Object::Object(Object_Type object_type,float scale, glm::vec3 color) : Position(0.0f), Scale(1.0f), RotationAngle(0.0f), RotationAxis(1.0f, 1.0f, 1.0f)
 {
-	if (object_type == CUBE)
+	switch(object_type)
 	{
+	case CUBE:
 		CreateCube(1.0f*scale, 1.0f * scale, 1.0f * scale, color);
 		SetupElementMesh();
+		CreateCubeOutlines(1.01f * scale, 1.01f * scale, 1.01f * scale);
+		SetupOutlineElementMesh();
+		break;
+	case SPHERE:
+		CreateSphere(1.0f * scale, 10, 10, color);
+		SetupElementMesh();
+		CreateSphereOutlines(1.01f * scale, 10, 10);
+		SetupOutlineElementMesh();
+		break;
 	}
 	RotationAngle = 0;
 	RotationAxis = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -21,6 +33,10 @@ Object::~Object()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
+
+	glDeleteVertexArrays(1, &VAOut);
+	glDeleteBuffers(1, &VBOut);
+	glDeleteBuffers(1, &EBOut);
 }
 
 void Object::Draw(Shader& shader)
@@ -32,14 +48,15 @@ void Object::Draw(Shader& shader)
 	glBindVertexArray(0);
 }
 
-//void Object::DrawLines(Shader& shader)
-//{
-//	shader.use();
-//	shader.setMat4("model", ModelMatrix);
-//	glBindVertexArray(VAO);
-//	glDrawArrays(GL_LINEAR, 0, Vertices.size());
-//	glBindVertexArray(0);
-//}
+void Object::DrawLines(Shader& shader)
+{
+	shader.use();
+	shader.setMat4("model", ModelMatrix);
+	glBindVertexArray(VAOut);
+	glLineWidth(4.0f);
+	glDrawElements(GL_LINES, OutlineIndices.size(), GL_UNSIGNED_INT, nullptr);
+	glBindVertexArray(0);
+}
 
 void Object::CreateCube(float width, float height, float depth, glm::vec3 color)
 {
@@ -75,15 +92,146 @@ void Object::CreateCube(float width, float height, float depth, glm::vec3 color)
 	};
 }
 
-void Object::changeColor(glm::vec3 color)
+void Object::CreateCubeOutlines(float width, float height, float depth, glm::vec3 color)
 {
-	CreateCube(1.f, 1.f, 1.f, color);
+	float halfWidth = width * 0.5f;
+	float halfHeight = height * 0.5f;
+	float halfDepth = depth * 0.5f;
+
+	OutlineVertices = {
+		{{-halfWidth, -halfHeight, -halfDepth}, {color}},
+		{{halfWidth, -halfHeight, -halfDepth}, {color}},
+		{{halfWidth, halfHeight, -halfDepth}, {color}},
+		{{-halfWidth, halfHeight, -halfDepth}, {color}},
+
+		{{-halfWidth, -halfHeight, halfDepth}, {color}},
+		{{halfWidth, -halfHeight, halfDepth}, {color}},
+		{{halfWidth, halfHeight, halfDepth}, {color}},
+		{{-halfWidth, halfHeight, halfDepth}, {color}}
+	};
+
+	OutlineIndices = 
+	{
+		// Back face (4 edges)
+	0, 1, 1, 2, 2, 3, 3, 0,
+	// Front face (4 edges)
+	4, 5, 5, 6, 6, 7, 7, 4,
+	// Connecting edges (4 edges)
+	0, 4, 1, 5, 2, 6, 3, 7
+	};
+}
+
+void Object::CreateSphere(float radius, unsigned int sectorCount, unsigned int stackCount, glm::vec3 color)
+{
+	float x, y, z, xy;
+	float sectorStep = 2 * M_PI / sectorCount;
+	float stackStep = M_PI / stackCount;
+	float sectorAngle, stackAngle;
+
+	for (unsigned int i = 0; i <= stackCount; ++i) {
+		stackAngle = M_PI / 2 - i * stackStep; 
+		xy = radius * cosf(stackAngle); 
+		z = radius * sinf(stackAngle);
+
+		for (unsigned int j = 0; j <= sectorCount; ++j) {
+			sectorAngle = j * sectorStep; 
+
+			
+			x = xy * cosf(sectorAngle); 
+			y = xy * sinf(sectorAngle); 
+			Vertex vertex;
+			vertex.Position = glm::vec3(x, y, z);
+			float u = (float)j / sectorCount;
+			float v = (float)i / stackCount;
+			//vertex.TexMex = glm::vec2(u, v);
+			vertex.Color = color;
+
+			//vertex.Barycentric = (i + j) % 2 == 0 ? glm::vec3(1.0, 0.0, 0.0) : glm::vec3(0.0, 1.0, 0.0);
+
+			Vertices.push_back(vertex);
+		}
+	}
+
+	for (unsigned int i = 0; i < stackCount; ++i) {
+		for (unsigned int j = 0; j < sectorCount; ++j) {
+			unsigned int first = i * (sectorCount + 1) + j;
+			unsigned int second = first + sectorCount + 1;
+
+			Indices.push_back(first);
+			Indices.push_back(second);
+			Indices.push_back(first + 1);
+
+			Indices.push_back(second);
+			Indices.push_back(second + 1);
+			Indices.push_back(first + 1);
+		}
+	}
+}
+
+void Object::CreateSphereOutlines(float radius, unsigned int sectorCount, unsigned int stackCount, glm::vec3 color)
+{
+	float x, y, z, xy; 
+	float sectorStep = 2 * M_PI / sectorCount;
+	float stackStep = M_PI / stackCount;
+	float sectorAngle, stackAngle;
+
+	for (unsigned int i = 0; i <= stackCount; ++i) {
+		stackAngle = M_PI / 2 - i * stackStep;
+		xy = radius * cosf(stackAngle);
+		z = radius * sinf(stackAngle);
+
+		for (unsigned int j = 0; j <= sectorCount; ++j) {
+			sectorAngle = j * sectorStep;
+
+
+			x = xy * cosf(sectorAngle);
+			y = xy * sinf(sectorAngle);
+			Vertex vertex;
+			vertex.Position = glm::vec3(x, y, z);
+			float u = (float)j / sectorCount;
+			float v = (float)i / stackCount;
+			//vertex.TexMex = glm::vec2(u, v);
+			vertex.Color = color;
+
+			//vertex.Barycentric = (i + j) % 2 == 0 ? glm::vec3(1.0, 0.0, 0.0) : glm::vec3(0.0, 1.0, 0.0);
+
+			OutlineVertices.push_back(vertex);
+		}
+	}
+
+	for (unsigned int i = 0; i < stackCount; ++i) {
+		for (unsigned int j = 0; j < sectorCount; ++j) {
+			unsigned int first = i * (sectorCount + 1) + j;
+			unsigned int second = first + sectorCount + 1;
+
+			OutlineIndices.push_back(first);
+			OutlineIndices.push_back(second);
+			OutlineIndices.push_back(first + 1);
+
+			OutlineIndices.push_back(second);
+			OutlineIndices.push_back(second + 1);
+			OutlineIndices.push_back(first + 1);
+		}
+	}
+}
+
+void Object::SetRotation(float rotAngle, glm::vec3 rotAxis)
+{
+	RotationAngle = rotAngle;
+	RotationAxis = rotAxis;
 	UpdateModelMatrix();
 }
 
-void Object::rotate(glm::mat4 model, float time, glm::vec3 rotation)
+void Object::UpdatePosition(glm::vec3 position)
 {
+	Position = position;
+	UpdateModelMatrix();
+}
 
+void Object::ChangeColor(glm::vec3 color)
+{
+	CreateCube(1.f, 1.f, 1.f, color);
+	UpdateModelMatrix();
 }
 
 void Object::SetupElementMesh()
@@ -99,6 +247,37 @@ void Object::SetupElementMesh()
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(unsigned int), Indices.data(), GL_STATIC_DRAW);
+
+	// Position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
+	glEnableVertexAttribArray(0);
+
+	// Color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Color));
+	glEnableVertexAttribArray(1);
+
+	// Barycentric coord
+	/*glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexMex));
+	glEnableVertexAttribArray(2);*/
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Object::SetupOutlineElementMesh()
+{
+	glGenVertexArrays(1, &VAOut);
+	glGenBuffers(1, &VBOut);
+	glGenBuffers(1, &EBOut);
+
+	glBindVertexArray(VAOut);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOut);
+	glBufferData(GL_ARRAY_BUFFER, OutlineVertices.size() * sizeof(Vertex), OutlineVertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOut);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, OutlineIndices.size() * sizeof(unsigned int), OutlineIndices.data(), GL_STATIC_DRAW);
 
 	// Position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
