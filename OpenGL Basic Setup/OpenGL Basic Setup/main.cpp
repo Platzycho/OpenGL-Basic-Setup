@@ -1,7 +1,6 @@
 #include "ObjectHandler.h"
 #include "GLFW/glfw3.h"
 #include "Camera.h"
-#include <algorithm>
 
 struct CallbackData {
     Shader* myShader;

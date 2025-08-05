@@ -135,6 +135,7 @@
     <ClInclude Include="ObjectHandler.h" />
     <ClInclude Include="ObjectStorage.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SpherePhysics.h" />
     <ClInclude Include="Structs.h" />
   </ItemGroup>
   <ItemGroup>

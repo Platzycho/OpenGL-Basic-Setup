@@ -1,4 +1,3 @@
-
 #include "Object.h"
 #include "Shader.h"
 #include "ObjectStorage.h"
