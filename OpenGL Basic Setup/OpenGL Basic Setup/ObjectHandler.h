@@ -1,0 +1,55 @@
+#pragma once
+#include "Shader.h"
+#include "Object.h"
+#include "ObjectStorage.h"
+#include <algorithm>
+
+class ObjectHandler
+{
+public:
+	ObjectHandler()
+	{
+
+		for (int i = 0; i < surfaceTileRow; i++)
+		{
+			for (int j = 0; j < surfaceTileStack; j++)
+			{
+				auto object = new Object(PLANE, 1.f, glm::vec3(0.5f, 0.5f, 0.0f));
+				object->SetPosition(glm::vec3((float)i - (float)surfaceTileRow * 0.5f + 0.5f, 0.0f, (float)j - (float)surfaceTileStack * 0.5f + 0.5f));
+			}
+		}
+	}
+
+	~ObjectHandler()
+	{
+		for (const auto& obj : ObjectStorage::getInstance().GetPlaneObjects())
+		{
+			obj->~Object();
+		}
+
+		axisLines.~Object();
+	}
+
+
+	void drawObjects(Shader& myShader)
+	{
+		for (const auto& obj : ObjectStorage::getInstance().GetPlaneObjects())
+		{
+			obj->Draw(myShader);
+			obj->DrawLines(myShader);
+		}
+
+		axisLines.DrawLines(myShader);
+
+
+		//rotationAngle += 0.5f;
+		//defaultCube.SetRotation(rotationAngle, glm::vec3(0.5f, 0.0f, 0.5f));
+	}
+
+
+private:
+	Object axisLines = Object(AXIS);
+	int surfaceTileRow = 4;
+	int surfaceTileStack = 5;
+	float rotationAngle = 0.0f;
+};

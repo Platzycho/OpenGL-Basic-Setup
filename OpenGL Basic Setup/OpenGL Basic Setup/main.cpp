@@ -1,7 +1,6 @@
-#include "Shader.h"
+#include "ObjectHandler.h"
 #include "GLFW/glfw3.h"
 #include "Camera.h"
-#include "Object.h"
 #include <algorithm>
 
 struct CallbackData {
@@ -21,7 +20,6 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-float rotationAngle = 0.0f;
 
 int main() {
 	glfwInit();
@@ -49,8 +47,7 @@ int main() {
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	Shader myShader("shader.vs", "shader.fs");
-
-	Object defaultCube(CUBE, 1.f, glm::vec3(1.0f, 0.5f, 1.0f));
+	ObjectHandler world;
 
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)800 / (float)600, 0.1f, 100.0f);
 	glm::mat4 view = camera.GetViewMatrix();
@@ -67,6 +64,8 @@ int main() {
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+	std::cout << ObjectStorage::getInstance().GetPlaneObjects().size() << std::endl;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = static_cast<float>(glfwGetTime());
@@ -77,7 +76,6 @@ int main() {
 		glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
-		
 
 		// Pass projection matrix to shader (note: in this case it's fine to do it once per frame)
 		glUniformMatrix4fv(glGetUniformLocation(myShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -86,15 +84,16 @@ int main() {
 		glUniformMatrix4fv(glGetUniformLocation(myShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
 		glm::mat4 model = glm::mat4(1.0f); 
-		rotationAngle += 0.5f;
-		defaultCube.SetRotation(rotationAngle, glm::vec3(0.5f, 0.0f, 0.5f));
 
 		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, -1.0f, 1.0f));
 		glUniformMatrix4fv(glGetUniformLocation(myShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
+		world.drawObjects(myShader);
+
+		//testSurface.Draw
 		//defaultCube.changeColor(glm::vec3);
-		defaultCube.DrawLines(myShader);
-		defaultCube.Draw(myShader);
+		//defaultCube.DrawLines(myShader);
+		//defaultCube.Draw(myShader);
 
 		//defaultCubeOutline.DrawLines(myShader);
 
@@ -102,7 +101,8 @@ int main() {
 		glfwPollEvents();
 	}
 
-	defaultCube.~Object();
+	
+	world.~ObjectHandler();
 	glfwTerminate();
 	return 0;
 }

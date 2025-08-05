@@ -1,6 +1,8 @@
 
 #include "Object.h"
 #include "Shader.h"
+#include "ObjectStorage.h"
+
 const double M_PI = 3.141592653589793;
 
 
@@ -15,17 +17,42 @@ Object::Object(Object_Type object_type,float scale, glm::vec3 color) : Position(
 		SetupElementMesh();
 		CreateCubeOutlines(1.01f * scale, 1.01f * scale, 1.01f * scale);
 		SetupOutlineElementMesh();
+		ObjectStorage::getInstance().AddCubeObject(this);
 		break;
+
 	case SPHERE:
 		CreateSphere(1.0f * scale, 10, 10, color);
 		SetupElementMesh();
 		CreateSphereOutlines(1.01f * scale, 10, 10);
 		SetupOutlineElementMesh();
+		ObjectStorage::getInstance().AddSphereObject(this);
+		break;
+
+	case PYRAMID:
+
+		break;
+
+	case PLANE:
+		CreatePlane();
+		SetupElementMesh();
+		CreatePlaneOutlines();
+		SetupOutlineElementMesh();
+		ObjectStorage::getInstance().AddPlaneObject(this);
+
+		break;
+
+	case AXIS:
+		CreateAxisLines();
+		SetupOutlineElementMesh();
+		break;
+
+	default:
 		break;
 	}
 	RotationAngle = 0;
 	RotationAxis = glm::vec3(1.0f, 1.0f, 1.0f);
 	UpdateModelMatrix();
+	ObjectStorage::getInstance().AddObject(this);
 }
 
 Object::~Object()
@@ -215,6 +242,112 @@ void Object::CreateSphereOutlines(float radius, unsigned int sectorCount, unsign
 	}
 }
 
+void Object::CreatePlane(float scale, Plane_Up_Axis axis, glm::vec3 color)
+{
+	float trueScale = scale * 0.5f;
+
+	switch (axis)
+	{
+	case XAXIS:
+
+		Vertices = {
+		{{-trueScale, -trueScale, -trueScale}, {color}},
+		{{-trueScale, trueScale, -trueScale}, {color}},
+		{{-trueScale, trueScale, trueScale}, {color}},
+		{{-trueScale, -trueScale, trueScale}, {color}}
+		};
+		break;
+
+	case YAXIS:
+		Vertices = {
+		{{-trueScale, -trueScale, -trueScale}, {color}},
+		{{trueScale, -trueScale, -trueScale}, {color}},
+		{{trueScale, -trueScale, trueScale}, {color}},
+		{{-trueScale, -trueScale, trueScale}, {color}}
+	};
+		break; 
+
+	case ZAXIS:
+		Vertices = {
+		{{-trueScale, -trueScale, -trueScale}, {color}},
+		{{trueScale, -trueScale, -trueScale}, {color}},
+		{{trueScale, trueScale, -trueScale}, {color}},
+		{{-trueScale, trueScale, -trueScale}, {color}}
+	};
+		break;
+
+	default:
+		break;
+	}
+
+	Indices = {
+		0, 1, 2, 2, 3, 0
+	};
+}
+
+void Object::CreatePlaneOutlines(float scale, Plane_Up_Axis axis, glm::vec3 color)
+{
+	float trueScale = scale * 0.5f;
+	float outlineDiff = 0.001f;
+
+	switch (axis)
+	{
+	case XAXIS:
+
+		OutlineVertices = {
+		{{-trueScale + outlineDiff, -trueScale, -trueScale}, {color}},
+		{{-trueScale + outlineDiff, trueScale, -trueScale}, {color}},
+		{{-trueScale + outlineDiff, trueScale, trueScale}, {color}},
+		{{-trueScale + outlineDiff, -trueScale, trueScale}, {color}}
+		};
+		break;
+
+	case YAXIS:
+		OutlineVertices = {
+		{{-trueScale, -trueScale + outlineDiff, -trueScale}, {color}},
+		{{trueScale, -trueScale + outlineDiff, -trueScale}, {color}},
+		{{trueScale, -trueScale + outlineDiff, trueScale}, {color}},
+		{{-trueScale, -trueScale + outlineDiff, trueScale}, {color}}
+		};
+		break;
+
+	case ZAXIS:
+		OutlineVertices = {
+		{{-trueScale, -trueScale, -trueScale + outlineDiff}, {color}},
+		{{trueScale, -trueScale, -trueScale + outlineDiff}, {color}},
+		{{trueScale, trueScale, -trueScale + outlineDiff}, {color}},
+		{{-trueScale, trueScale, -trueScale + outlineDiff}, {color}}
+		};
+		break;
+
+	default:
+		break;
+	}
+
+	OutlineIndices = {
+		0, 1, 1, 2,
+		2, 3, 3, 0
+	};
+}
+
+void Object::CreateAxisLines()
+{
+	OutlineVertices = {
+		{{-20.f, 0.f, 0.f},{1.0f, 0.0f, 0.0f}},
+		{{20.f, 0.f, 0.f},{1.0f, 0.0f, 0.0f}},
+		{{0.f, -20.f, 0.f},{0.0f, 1.0f, 0.0f}},
+		{{0.f, 20.f, 0.f},{0.0f, 1.0f, 0.0f}},
+		{{0.f, 0.f, -20.f},{0.0f, 0.0f, 1.0f}},
+		{{0.f, 0.f, 20.f},{0.0f, 0.0f, 1.0f}}
+	};
+
+	OutlineIndices = {
+		0, 1,
+		2, 3,
+		4, 5
+	};
+}
+
 void Object::SetRotation(float rotAngle, glm::vec3 rotAxis)
 {
 	RotationAngle = rotAngle;
@@ -231,6 +364,12 @@ void Object::UpdatePosition(glm::vec3 position)
 void Object::ChangeColor(glm::vec3 color)
 {
 	CreateCube(1.f, 1.f, 1.f, color);
+	UpdateModelMatrix();
+}
+
+void Object::SetPosition(glm::vec3 position)
+{
+	Position = position;
 	UpdateModelMatrix();
 }
 
