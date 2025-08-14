@@ -18,6 +18,8 @@ public:
 				object->SetPosition(glm::vec3((float)i - (float)surfaceTileRow * 0.5f + 0.5f, 0.0f, (float)j - (float)surfaceTileStack * 0.5f + 0.5f));
 			}
 		}
+
+		testSphere.SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
 	}
 
 	~ObjectHandler()
@@ -39,6 +41,9 @@ public:
 			obj->DrawLines(myShader);
 		}
 
+		testSphere.Draw(myShader);
+		testSphere.DrawLines(myShader);
+
 		axisLines.DrawLines(myShader);
 
 
@@ -49,7 +54,8 @@ public:
 
 private:
 	Object axisLines = Object(AXIS);
-	int surfaceTileRow = 4;
+	Object testSphere = Object(SPHERE, 0.5, glm::vec3(0.8, 0.0, 0.0));
+	int surfaceTileRow = 6;
 	int surfaceTileStack = 5;
 	float rotationAngle = 0.0f;
 };
