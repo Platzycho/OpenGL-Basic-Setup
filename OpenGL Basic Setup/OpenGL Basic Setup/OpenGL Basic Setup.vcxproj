@@ -136,7 +136,9 @@
     <ClInclude Include="ObjectStorage.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SpherePhysics.h" />
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="Structs.h" />
+    <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />

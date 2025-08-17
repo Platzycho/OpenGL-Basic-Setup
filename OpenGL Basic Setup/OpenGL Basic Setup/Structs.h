@@ -1,9 +1,15 @@
 #pragma once
 #include <vector>
 
-struct Vertex {
+struct VertexColor {
 	glm::vec3 Position, Color;
-	//glm::vec2 TexMex;
+	glm::vec2 TexCoords;
+};
+
+struct VertexTexture
+{
+	glm::vec3 Position;
+	glm::vec2 TexCoords;
 };
 
 struct Collision {

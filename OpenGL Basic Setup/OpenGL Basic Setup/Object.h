@@ -72,8 +72,9 @@ public:
 private:
 	unsigned int VAO, VBO, EBO;
 	unsigned int VAOut, VBOut, EBOut;
-	std::vector<Vertex> Vertices;
-	std::vector<Vertex> OutlineVertices;
+	std::vector<VertexColor> Vertices;
+	std::vector<VertexTexture> TexVertices;
+	std::vector<VertexColor> OutlineVertices;
 	glm::vec3 Position;
 	glm::vec3 Scale;
 	glm::mat4 ModelMatrix;

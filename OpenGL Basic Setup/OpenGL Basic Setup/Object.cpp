@@ -165,7 +165,7 @@ void Object::CreateSphere(float radius, unsigned int sectorCount, unsigned int s
 			
 			x = xy * cosf(sectorAngle); 
 			y = xy * sinf(sectorAngle); 
-			Vertex vertex;
+			VertexColor vertex;
 			vertex.Position = glm::vec3(x, y, z);
 			float u = (float)j / sectorCount;
 			float v = (float)i / stackCount;
@@ -212,7 +212,7 @@ void Object::CreateSphereOutlines(float radius, unsigned int sectorCount, unsign
 
 			x = xy * cosf(sectorAngle);
 			y = xy * sinf(sectorAngle);
-			Vertex vertex;
+			VertexColor vertex;
 			vertex.Position = glm::vec3(x, y, z);
 			float u = (float)j / sectorCount;
 			float v = (float)i / stackCount;
@@ -381,17 +381,17 @@ void Object::SetupElementMesh()
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(Vertex), Vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(VertexColor), Vertices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(unsigned int), Indices.data(), GL_STATIC_DRAW);
 
 	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (void*)offsetof(VertexColor, Position));
 	glEnableVertexAttribArray(0);
 
 	// Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Color));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (void*)offsetof(VertexColor, Color));
 	glEnableVertexAttribArray(1);
 
 	// Barycentric coord
@@ -412,17 +412,17 @@ void Object::SetupOutlineElementMesh()
 	glBindVertexArray(VAOut);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBOut);
-	glBufferData(GL_ARRAY_BUFFER, OutlineVertices.size() * sizeof(Vertex), OutlineVertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, OutlineVertices.size() * sizeof(VertexColor), OutlineVertices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOut);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, OutlineIndices.size() * sizeof(unsigned int), OutlineIndices.data(), GL_STATIC_DRAW);
 
 	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Position));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (void*)offsetof(VertexColor, Position));
 	glEnableVertexAttribArray(0);
 
 	// Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Color));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexColor), (void*)offsetof(VertexColor, Color));
 	glEnableVertexAttribArray(1);
 
 	// Barycentric coord
