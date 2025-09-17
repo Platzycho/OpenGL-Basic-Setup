@@ -1,7 +1,6 @@
 #pragma once
 #define STB_IMAGE_IMPLEMENTATION
 #include <iostream>
-
 #include "stb_image.h"
 #include <string>
 #include "glad/glad.h"
@@ -27,7 +26,7 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		int widht, height, nrChannels;
+		int width, height, nrChannels;
 		stbi_set_flip_vertically_on_load(true);
 		unsigned char* data = stbi_load(imagePath, &width, &height, &nrChannels, 0);
 		if (data)
