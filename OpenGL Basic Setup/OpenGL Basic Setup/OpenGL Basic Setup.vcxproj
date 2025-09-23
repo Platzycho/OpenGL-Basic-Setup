@@ -136,6 +136,7 @@
     <ClInclude Include="ObjectStorage.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SpherePhysics.h" />
+    <ClInclude Include="Spline_Comp1.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Structs.h" />
     <ClInclude Include="Texture.h" />
@@ -146,6 +147,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Spline_Comp1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="Dependencies\libs\GLFW\glfw3.lib" />

@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "Object.h"
 #include "ObjectStorage.h"
+#include "Spline_Comp1.h"
 #include <algorithm>
 
 class ObjectHandler
@@ -46,6 +47,8 @@ public:
 
 		axisLines.DrawLines(myShader);
 
+		splineCurve.DrawLines(myShader);
+
 
 		//rotationAngle += 0.5f;
 		//defaultCube.SetRotation(rotationAngle, glm::vec3(0.5f, 0.0f, 0.5f));
@@ -53,8 +56,18 @@ public:
 
 
 private:
+	int samplePoints = 100;
+	std::vector<glm::vec3> controlPoints = {
+	{1.0f, 0.0f, 0.0f},
+	{1.0f, 1.0f, 2.0f},
+	{1.0f, 2.0f, 0.0f}
+	};
+	std::vector<float> knots = { 0, 0, 0, 1, 1, 1 };
+	int degree = 2;
+
 	Object axisLines = Object(AXIS);
 	Object testSphere = Object(SPHERE, 0.5, glm::vec3(0.8, 0.0, 0.0));
+	Spline_Comp1 splineCurve = Spline_Comp1(samplePoints, controlPoints, knots, degree);
 	int surfaceTileRow = 6;
 	int surfaceTileStack = 5;
 	float rotationAngle = 0.0f;
