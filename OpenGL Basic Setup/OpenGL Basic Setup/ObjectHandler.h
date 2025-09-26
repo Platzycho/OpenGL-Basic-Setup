@@ -62,12 +62,22 @@ private:
 	{1.0f, 1.0f, 2.0f},
 	{1.0f, 2.0f, 0.0f}
 	};
+
+	std::vector<glm::vec3> controlPoints4 = {
+	{0.0f, 0.0f, 0.0f},
+	{0.0f, 1.0f, 0.0f},
+	{0.0f, 2.0f, 0.0f}
+	};
+
+
 	std::vector<float> knots = { 0, 0, 0, 1, 1, 1 };
 	int degree = 2;
 
 	Object axisLines = Object(AXIS);
 	Object testSphere = Object(SPHERE, 0.5, glm::vec3(0.8, 0.0, 0.0));
-	Spline_Comp1 splineCurve = Spline_Comp1(samplePoints, controlPoints, knots, degree);
+	Spline_Comp1 splineCurve = Spline_Comp1(samplePoints, controlPoints4, knots, degree);
+	
+
 	int surfaceTileRow = 6;
 	int surfaceTileStack = 5;
 	float rotationAngle = 0.0f;

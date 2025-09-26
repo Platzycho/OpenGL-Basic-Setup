@@ -4,6 +4,16 @@ Spline_Comp1::Spline_Comp1(int samplePoints, std::vector<glm::vec3> controlPoint
 {
 	Vertices = SampleBSplineVertices(samplePoints, degree, controlPoints, knots, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	EvaluateSplineAt(tValues, degree, controlPoints, knots);
+
+	SplineDerivative(tValues[0],controlPoints);
+	SplineDerivative(tValues[1], controlPoints);
+	SplineDerivative(tValues[2], controlPoints);
+
+	SplineDerivative(tValues[0], degree, controlPoints, knots);
+	SplineDerivative(tValues[1], degree, controlPoints, knots);
+	SplineDerivative(tValues[2], degree, controlPoints, knots);
+
+
 	SetupElementMesh();
 	RotationAngle = 0;
 	RotationAxis = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -105,7 +115,7 @@ std::vector<glm::vec3> Spline_Comp1::EvaluateSplineAt(const std::vector<float>& 
 		std::cout << "f(" << tValues[i] << ") = ("
 			<< results[i].x << ", "
 			<< results[i].y << ", "
-			<< results[i].z << ")\n";
+			<< results[i].z << ")\n\n";
 	}
 
 
@@ -125,8 +135,95 @@ glm::vec3 Spline_Comp1::SplineDerivative(float u, const std::vector<glm::vec3>& 
 {
 	float dN0, dN1, dN2;
 	QuadraticBasisDerivatives(u, dN0, dN1, dN2);
+	glm::vec3 result = dN0 * controlPoints[0] + dN1 * controlPoints[1] + dN2 * controlPoints[2];
+	std::cout << "At t=" << u << ":\n";
+	std::cout << "B'_{0,2}(t) = " << dN0 << "\n";
+	std::cout << "B'_{1,2}(t) = " << dN1 << "\n";
+	std::cout << "B'_{2,2}(t) = " << dN2 << "\n\n";
 	return dN0 * controlPoints[0] + dN1 * controlPoints[1] + dN2 * controlPoints[2];
 }
+
+glm::vec3 Spline_Comp1::SplineDerivative(float u, int degree, const std::vector<glm::vec3>& controlPoints, const std::vector<float>& knots)
+{
+	int n = (int)controlPoints.size();
+	assert((int)knots.size() == n + degree + 1);
+
+	if (n == 0) return glm::vec3(0.0f);
+
+	std::vector<float> dN = BasisDerivatives(u, degree, knots, n);
+
+	glm::vec3 result(0.0f);
+	for (int i = 0; i < n; ++i) {
+		result += dN[i] * controlPoints[i];
+	}
+	std::cout << "Spline Derivative for t value: " << u << " = (" << result.x << ", " << result.y << ", " << result.z << ")\n";
+
+	return result;
+}
+std::vector<std::vector<float>> Spline_Comp1::BuildBasisTable(float u, int degree, const std::vector<float>& knots, int nControl)
+{
+	assert((int)knots.size() == nControl + degree + 1);
+
+	std::vector<std::vector<float>> N_table(degree + 1, std::vector<float>(nControl, 0.0f));
+
+	for (int i = 0; i < nControl; ++i) {
+		if ((knots[i] <= u && u < knots[i + 1]) || (u == knots.back() && knots[i + 1] == knots.back()))
+			N_table[0][i] = 1.0f;
+		else
+			N_table[0][i] = 0.0f;
+	}
+
+	for (int k = 1; k <= degree; ++k) {
+		for (int i = 0; i < nControl; ++i) {
+			float left = 0.0f, right = 0.0f;
+
+			float denom1 = knots[i + k] - knots[i];
+			if (denom1 != 0.0f)
+				left = ((u - knots[i]) / denom1) * N_table[k - 1][i];
+
+			if (i + 1 < nControl) {
+				float denom2 = knots[i + k + 1] - knots[i + 1];
+				if (denom2 != 0.0f)
+					right = ((knots[i + k + 1] - u) / denom2) * N_table[k - 1][i + 1];
+			}
+
+			N_table[k][i] = left + right;
+		}
+	}
+
+	return N_table;
+}
+
+std::vector<float> Spline_Comp1::BasisDerivatives(float u, int degree, const std::vector<float>& knots, int nControl)
+{
+	assert(degree >= 1); 
+	assert((int)knots.size() == nControl + degree + 1);
+
+	auto N_table = BuildBasisTable(u, degree, knots, nControl);
+
+	std::vector<float> dN(nControl, 0.0f);
+	for (int i = 0; i < nControl; ++i) {
+		float term1 = 0.0f, term2 = 0.0f;
+
+		float denom1 = knots[i + degree] - knots[i];
+		if (denom1 != 0.0f) {
+			term1 = (float)degree / denom1 * N_table[degree - 1][i];
+		}
+
+		if (i + 1 < nControl) {
+			float denom2 = knots[i + degree + 1] - knots[i + 1];
+			if (denom2 != 0.0f) {
+				term2 = (float)degree / denom2 * N_table[degree - 1][i + 1];
+			}
+		}
+
+		dN[i] = term1 - term2;
+	}
+
+	return dN;
+}
+
+
 
 void Spline_Comp1::DrawLines(Shader& shader)
 {

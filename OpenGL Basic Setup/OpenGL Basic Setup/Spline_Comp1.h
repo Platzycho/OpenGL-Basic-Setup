@@ -28,10 +28,13 @@ public:
 	);
 
 	std::vector<glm::vec3> EvaluateSplineAt(const std::vector<float>& tValues, int degree, const std::vector<glm::vec3>& controlPoints, const std::vector<float>& knots);
-
 	void QuadraticBasisDerivatives(float u, float& dN0, float& dN1, float& dN2);
-
 	glm::vec3 SplineDerivative(float u, const std::vector<glm::vec3>& controlPoints);
+	glm::vec3 SplineDerivative(float u, int degree, const std::vector<glm::vec3>& controlPoints, const std::vector<float>& knots);
+
+	static std::vector<std::vector<float>> BuildBasisTable(float u, int degree, const std::vector<float>& knots, int nControl);
+
+	static std::vector<float> BasisDerivatives(float u, int degree, const std::vector<float>& knots, int nControl);
 
 
 	std::vector<glm::vec3> splineToDraw;
